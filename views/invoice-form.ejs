@@ -1,0 +1,95 @@
+<a href="/invoices">Return to Invoices</a>
+<h3><%= invoiceId?'Edit':'New' %> Invoice</h3>
+<form
+  id="invoice-form"
+  action="/invoices/edit/<%= invoiceId??''%>"
+  method="POST"
+>
+  <label for="invoiceNumber">Invoice Number:</label>
+  <input
+    id="invoice-number"
+    name="invoiceNumber"
+    type="string"
+    value="<%=invoice.invoiceNumber ?
+  invoice.invoiceNumber : '' %>"
+  />
+  <label for="invoiceDate">Invoice Date:</label>
+  <input
+    id="invoice-date"
+    name="invoiceDate"
+    type="date"
+    value="<%=invoice.invoiceDate ? invoice.invoiceDate.toISOString().split('T')[0]: '' %>"
+  />
+  <label for="dueDate">Due Date:</label>
+  <input
+    id="due-date"
+    name="dueDate"
+    type="date"
+    value="<%=invoice.dueDate ? invoice.dueDate.toISOString().split('T')[0] : '' %>"
+  />
+  <label for="clientId">Client:</label>
+  <select name="clientId">
+    <option value="">Select a client</option>
+    <% for (let i=0; i < clientList.length; i++) { %>
+    <option value="<%=clientList[i]._id %>" <%=invoice.invoiceClient && clientList[i]._id.equals(invoice.invoiceClient._id) && 'selected' %>
+      > <%= clientList[i].name%>
+    </option>
+    <%} %>
+  </select>
+  <div id="product-section">
+    <label for="productId">Product:</label>
+    <% for (let i=0; i < numProdRows; i++) { %>
+        <div id='product-row' class="display-flex margin-bottom">
+          <select name="productId[]" id="productId">
+            <option value="">Select a product</option>
+            <% for (let j=0; j < productList.length; j++) { %>
+            <option
+              value="<%=productList[j]._id %>"
+              <%= invoice.products && invoice.products[i] && productList[j]._id.equals(invoice.products[i]._id) && 'selected' %>
+            >
+              <%= productList[j].name%>
+            </option>
+            <%} %>
+          </select>
+          <label for="productQuantity" hidden></label>
+          <input
+            id="productQuantity"
+            name="quantity[]"
+            type="number"
+            placeholder="Enter quantity"
+            value="<%= invoice.quantities && invoice.quantities[i]%>"
+          />
+        </div>
+    <%} %>
+  </div>
+  <input
+    id="invoiceId"
+    name="invoiceId"
+    type="string"
+    value="<%= invoiceId %>"
+    hidden
+  />
+  <input id="numProdRows" name="numProdRows" type="number" value="<%=numProdRows??0%>" hidden />
+  <button class="btn btn-primary margin-bottom"  type="button" onClick="addProduct()">Add Product</button>
+  <button class="btn btn-success margin-bottom" type="submit" value="Submit">Submit</button>
+</form>
+<p class="error-message inline-block" ><%= errorMessage %></p>
+<script>
+  //set default date if one is not provided
+  let invoiceDate = document.getElementById('invoice-date');
+  if (invoiceDate.value === '') {
+    invoiceDate.valueAsDate = new Date();
+  }
+
+  const addProduct = ()=>{
+    //find the numProdRow element and increment its value by one
+    const numProdRowsElement = document.getElementById('numProdRows');
+    numProdRowsElement.value = parseInt(numProdRowsElement.value)+1;
+    //deep copy an entire product+quantity row and append to end of that form section
+    const productRow = document.getElementById('product-row');
+    let newProductRow = productRow.cloneNode(true);
+    document.getElementById('product-section').appendChild(newProductRow);
+  }
+
+
+</script>

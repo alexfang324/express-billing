@@ -1,0 +1,37 @@
+<h1>Products</h1>
+<p class="error-message"><%= errorMessage %></p>
+<form class="index-filter-form" action="/products" method="GET">
+  <label for="filterText">Filter Text:</label>
+  <input
+    id="filter-text"
+    name="filterText"
+    type="text"
+    value="<%=filterText?? '' %>"
+  />
+  <button class="btn btn-success" type="submit" value="Submit">Filter</button>
+</form>
+
+<button class="btn btn-primary" onClick="window.location.href='/products/edit'">
+  Create Product
+</button>
+<ul class="model-item-list">
+  <% for (let i=0; i < products.length; i++) { %>
+  <li>
+    <a href="/products/<%= products[i]._id%>"> <%= products[i].name%> </a>
+    <div>
+      <button
+        class="btn btn-success"
+        onClick="window.location.href='/products/edit/<%= products[i]._id%>'"
+      >
+        edit
+      </button>
+      <button
+        class="btn btn-danger"
+        onClick="window.location.href='/products/<%= products[i]._id%>/delete'"
+      >
+        delete
+      </button>
+    </div>
+  </li>
+  <% } %>
+</ul>

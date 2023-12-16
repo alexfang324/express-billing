@@ -1,0 +1,39 @@
+<h1>Invoices</h1>
+<p class="error-message"><%= errorMessage %></p>
+<form class="index-filter-form" action="/invoices" method="GET">
+  <label for="filterText">Filter Text:</label>
+  <input
+    id="filter-text"
+    name="filterText"
+    type="text"
+    value="<%=filterText?? '' %>"
+  />
+  <button class="btn btn-success" type="submit" value="Submit">Filter</button>
+</form>
+
+<button class="btn btn-primary" onClick="window.location.href='/invoices/edit'">
+  Create Invoice
+</button>
+<ul class="model-item-list">
+  <% for (let i=0; i < invoices.length; i++) { %>
+  <li>
+    <a href="/invoices/<%= invoices[i]._id%>">
+      <%= invoices[i].invoiceNumber%>
+    </a>
+    <div>
+      <button
+        class="btn btn-success"
+        onClick="window.location.href='/invoices/edit/<%= invoices[i]._id%>'"
+      >
+        edit
+      </button>
+      <button
+        class="btn btn-danger"
+        onClick="window.location.href='/invoices/<%= invoices[i]._id%>/delete'"
+      >
+        delete
+      </button>
+    </div>
+  </li>
+  <% } %>
+</ul>

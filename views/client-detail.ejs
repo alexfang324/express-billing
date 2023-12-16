@@ -1,0 +1,13 @@
+<a href="/clients">Return to Clients</a>
+
+<h2><%=clientA.name%></h2>
+<div>Client ID: <%=clientA._id%></div>
+<div>Code: <%=clientA.code%></div>
+<div>Company: <%=clientA.company%></div>
+<div>email: <%=clientA.email%></div>
+
+
+<button class="btn btn-success" onClick="window.location.href='/clients/edit/<%=clientA._id%>'">
+    Edit
+</button>
+

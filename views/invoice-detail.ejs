@@ -1,0 +1,62 @@
+<a href="/invoices" class="hideInPrint">Return to Invoices</a>
+<div class="row">
+  <div>
+    <h2 class="heading">BILL TO</h2>
+    <p><%=invoice.invoiceClient.name%><br><%=invoice.invoiceClient.company%><br><%=invoice.invoiceClient.email%>
+    </p>
+  </div>
+  <div class="box-row">
+    <div class="box border">
+      <h2 class="heading">DATE</h2>
+      <p><%=invoice.invoiceDate.toISOString().split('T')[0]%></p>
+    </div>
+    <div class="box border">
+      <h2 class="heading">PLEASE PAY</h2>
+      <p>CAD <%=invoiceTotal.toFixed(2)%></p>
+    </div>
+    <div class="box border">
+      <h2 class="heading">DUE DATE</h2>
+      <p><%=invoice.dueDate.toISOString().split('T')[0]%></p>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div>
+    <div>
+      <h2 class="heading">ITEM</h2>
+      <% for (let i=0;i<invoice.products.length;i++) {%>
+        <p><%=invoice.products[i].code%>: <%=invoice.products[i].name%></p>
+      <%}%>
+    </div>
+  </div>
+  <div class="box-row">
+    <div class="box wide-box">
+      <h2 class="heading">QTY</h2>
+      <% for (let i=0;i<invoice.products.length;i++) {%>
+        <p><%=invoice.quantities[i]%></p>
+      <%}%>
+    </div>
+    <div class="box wide-box">
+      <h2 class="heading">RATE</h2>
+      <% for (let i=0;i<invoice.products.length;i++) {%>
+        <p><%=invoice.products[i].unit_cost%></p>
+      <%}%>
+    </div>
+    <div class="box justify-right">
+      <h2 class="heading">AMOUNT</h2>
+      <% for (let i=0;i<invoice.products.length;i++) {%>
+        <p><%=(invoice.products[i].unit_cost*invoice.quantities[i]).toFixed(2)%></p>
+      <%}%>
+    </div>
+  </div>
+</div>
+<div class="summary row">
+  <div>
+    <p>Please remit payment via Interac E-Transfter to<br>owner@examplecompany.com</p>
+  </div>
+  <div class="box justify-left">
+    <h2 class="heading">TOTAL DUE</h2>
+    <p>CAD <%=invoiceTotal.toFixed(2)%></p>
+  </div>
+</div>
+

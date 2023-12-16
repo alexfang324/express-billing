@@ -1,0 +1,23 @@
+<header class="hideInPrint">
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/products">Products</a></li>
+      <li><a href="/clients">Clients</a></li>
+      <li><a href="/invoices">Invoices</a></li>
+      <li><a href="/user/profile">Profile</a></li>
+    </ul>
+  </nav>
+  <div class="starter-template">
+    <a href="/user/register">Register</a> |
+
+    <!-- Show 'Logout' and user name if authenticated. -->
+    <%if (reqInfo.authenticated) { %>
+    <a href="/user/logout">Logout</a> [<%= reqInfo.username %>]
+
+    <!-- 'else' must be in separate section with curly brackets to work. -->
+    <% } else { %>
+    <a href="/user/login">Login</a>
+    <% } %>
+  </div>
+</header>

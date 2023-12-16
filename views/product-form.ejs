@@ -1,0 +1,41 @@
+<a href="/products">Return to Products</a>
+<h3><%= productId?'Edit':'New' %> Product</h3>
+<form
+  id="product-create-form"
+  action="/products/edit/<%= productId??''%>"
+  method="POST"
+>
+  <label for="name">Name:</label>
+  <input
+    id="product-name"
+    name="name"
+    type="text"
+    value="<%=product.name ? product.name
+  : '' %>"
+  />
+  <label for="code">Code:</label>
+  <input
+    productId="code"
+    name="code"
+    type="string"
+    value="<%=product.code ? product.code : '' %>"
+  />
+  <label for="unit_cost">Unit Cost:</label>
+  <input
+    id="unit_cost"
+    name="unit_cost"
+    type="number"
+    step="0.01"
+    value="<%=product.unit_cost ?
+  product.unit_cost : '' %>"
+  />
+  <input
+    id="productId"
+    name="productId"
+    type="string"
+    value="<%= productId %>"
+    hidden
+  />
+  <button class="btn btn-success" type="submit" value="Submit">Submit</button>
+</form>
+<p class="error-message inline-block"><%= errorMessage %></p>

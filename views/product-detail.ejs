@@ -1,0 +1,12 @@
+<a href="/products">Return to Products</a>
+<h2><%= product.name%></h2>
+<p>ID: <%= product._id%></p>
+<p>Code: <%= product.code%></p>
+<p>Unit Cost: <%= product.unit_cost%></p>
+
+<button
+  class="btn btn-success"
+  onClick="window.location.href='/products/edit/<%=product._id%>'"
+>
+  Edit
+</button>

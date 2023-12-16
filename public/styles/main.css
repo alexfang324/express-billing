@@ -1,0 +1,199 @@
+/* Cross-Page stylings Tags */
+.display-flex {
+  display: flex;
+  gap: 10px;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+/* General styling */
+
+header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+body {
+  min-height: 100vh;
+  width: 80vw;
+  position: relative;
+  margin: 0 auto;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 50px;
+}
+
+.model-item-list {
+  list-style-type: none;
+  padding: 20px 0px;
+  margin: auto;
+}
+
+.model-item-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  width: 100%;
+  border-top: solid 1px black;
+  border-bottom: solid 1px black;
+}
+
+.model-item-list > li > a {
+  text-decoration: none;
+  font-size: 20px;
+}
+
+/* Header Stylings */
+header > nav > ul {
+  display: flex;
+  flex-direction: row;
+  list-style-type: none;
+  padding: 0;
+}
+
+header > nav > ul > li {
+  width: 100px;
+}
+
+header > nav > ul > li > a {
+  text-decoration: none;
+  font-size: 20px;
+}
+
+/* Footer Stylings */
+footer {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  bottom: 0vh;
+  margin-top: 20px;
+}
+
+/* Product Page Stylings */
+#product-list > li > a {
+  text-decoration: none;
+  font-size: 20px;
+}
+
+/* Product Create Page Stylings */
+#product-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+  width: 300px;
+}
+
+#product-create-form > button {
+  width: 100px;
+}
+
+/* Client Page Stylings */
+#submitButton {
+  margin-top: 10px;
+}
+
+#email {
+  margin-right: 37px;
+}
+#cancelButton {
+  display: inline;
+}
+
+/* Invoice Form Stylings */
+#invoice-form {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+#invoice-form > input,
+#invoice-form > select {
+  margin-bottom: 10px;
+}
+
+.margin-bottom {
+  margin-bottom: 10px;
+}
+
+/* Invoice Detail Page Styling */
+.vertical-align {
+  display: flex;
+  align-items: center;
+}
+
+header.row {
+  width: 100%;
+  margin: 30px 0px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+header.row > div > p {
+  display: inline-block;
+}
+
+header.row > p {
+  text-align: right;
+}
+
+.heading {
+  font-size: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  margin: 30px 0;
+}
+
+.box {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.box.justify-left {
+  justify-content: flex-start;
+  align-items: baseline;
+}
+
+.box.justify-right {
+  justify-content: flex-start;
+  align-items: end;
+}
+
+.box.wide-box {
+  width: 130px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.box-row {
+  display: flex;
+  justify-content: space-between;
+  align-content: top;
+}
+
+.border {
+  border: 1px solid black;
+}
+
+.summary > div:nth-of-type(2) {
+  justify-self: end;
+}
+
+@media print {
+  .hideInPrint {
+    display: none !important;
+  }
+}

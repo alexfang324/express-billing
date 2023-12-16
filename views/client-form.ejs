@@ -1,0 +1,53 @@
+<a href="/clients">Return to Clients</a>
+<h3><%= client_id ? "Edit" : "New" %> Client</h3>
+
+<form action="/clients/edit/<%=client_id?client_id:''%>" method="POST">
+  <input
+    type="hidden"
+    id="client_id"
+    name="client_id"
+    value="<%= client_id%>"
+  />
+  <div>
+    <label for="name">Name:</label>
+    <div>
+      <input id="name" name="name" type="text"
+      value="<%=clientA.name?clientA.name:''%>"
+    </div>
+  </div>
+
+  <div>
+    <label for="code">Code: </label>
+    <div>
+      <input id="code" name="code" type="text"
+      value="<%=clientA.code?clientA.code:''%>"
+    </div>
+  </div>
+  <div>
+    <label for="company">Company: </label>
+    <div>
+      <input id="company" name="company" type="text"
+      value="<%=clientA.company?clientA.company:''%>"
+    </div>
+  </div>
+
+  <div>
+    <label id="email" for="email">Email:</label>
+    <div>
+      <input id="email" name="email" type="text"
+      value="<%=clientA.email?clientA.email:''%>"
+    </div>
+  </div>
+
+  <div>
+    <button
+      id="submitButton"
+      class="btn btn btn-primary"
+      type="submit"
+      value="Submit"
+    >
+      Submit
+    </button>
+  </div>
+</form>
+<p class="error-message inline-block"><%= errorMessage %></p>
