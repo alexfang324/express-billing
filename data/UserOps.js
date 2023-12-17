@@ -4,6 +4,22 @@ class UserData {
   // Constructor
   UserData() {}
 
+  async getAllUsers() {
+    const users = await User.find({});
+    return users;
+  }
+
+  async getFilteredUsers(filterText) {
+    const _userOps = new userOps();
+    let result = await User.find({
+      username: {
+        $regex: `.*${filterText}.*`,
+        $options: 'i'
+      }
+    }).sort({ username: 1 });
+    return result;
+  }
+
   async getUserByUsername(username) {
     let user = await User.findOne({ username: username });
     return user;
@@ -13,7 +29,7 @@ class UserData {
   async getUserInfoByUsername(username) {
     let user = await User.findOne(
       { username: username },
-      { _id: 0, username: 1, email: 1, firstName: 1, lastName: 1 }
+      { _id: 0, username: 1, email: 1, firstName: 1, lastName: 1, roles: 1 }
     );
     if (user) {
       const response = { user: user, errorMessage: '' };
@@ -32,7 +48,7 @@ class UserData {
     }
   }
 
-  async updateProfileByUserName(username, formData) {
+  async updateUserByUserName(username, formData) {
     const user = await User.findOne({ username: username });
     for (const key in formData) {
       user[key] = formData[key];
@@ -54,6 +70,35 @@ class UserData {
       errorMsg: ''
     };
     return response;
+  }
+
+  // async updateUserByUserName(username, formData) {
+  //   let newUser = {};
+  //   for (const key in formData) {
+  //     newUser[key] = formData[key];
+  //   }
+  //   const user = await User.updateOne({ username: username }, newUser, {
+  //     upsert: true
+  //   }).catch((error) => {
+  //     console.log('Errorrrrrrrr: ', error);
+  //     const response = {
+  //       obj: newUser,
+  //       errorMsg: error
+  //     };
+  //     return response;
+  //   });
+
+  //   //update successful
+  //   const response = {
+  //     obj: user,
+  //     errorMsg: ''
+  //   };
+  //   return response;
+  // }
+
+  async deleteUserByUsername(username) {
+    const user = await User.findOneAndDelete({ username: username });
+    return user;
   }
 }
 

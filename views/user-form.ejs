@@ -1,0 +1,78 @@
+<a href="/users">Return to Users</a>
+<h3><%= username ? "Edit" : "New" %> User</h3>
+
+<form action="/users/edit/<%=username?username:''%>" method="POST">
+  <div>
+    <div>
+      <label for="firstName">First Name:</label>
+      <div>
+        <input id="firstName" name="firstName" type="text"
+        value="<%=user.firstName?user.firstName:''%>" required>
+      </div>
+    </div>
+    <div>
+      <label for="lastName">Last Name:</label>
+      <div>
+        <input id="lastName" name="lastName" type="text"
+        value="<%=user.lastName?user.lastName:''%>" required>
+      </div>
+    </div>
+    <div>
+      <label id="email" for="email">Email:</label>
+      <div>
+        <input id="email" name="email" type="text" class="<%=username?'readonly-text':''%>"
+        value="<%=user.email?user.email:''%>" <%= username? 'readonly':''%> required >
+      </div>
+    </div>
+    <div>
+      <label id="username" for="username">Username:</label>
+      <div>
+        <input id="username" name="username" type="text" class="<%=username?'readonly-text':''%>"
+        value="<%=user.username?user.username:''%>" 
+        <%= username? 'readonly':''%> required>
+      </div>
+    </div>
+    <% if (username) { %>
+    <div>
+      <label for="oldPassword">Old Password:</label>
+      <div>
+        <input id="oldPassword" name="oldPpassword" type="password" >
+      </div>
+    </div>
+    <% } %>
+    <div>
+    <div>
+      <label for="newPassword"><%= username? 'New Password':'Password' %>:</label>
+      <div>
+        <input id="newPassword" name="newPassword" type="password" >
+      </div>
+    </div>
+    <div>
+      <label for="passwordConfirm"> Confirm Password:</label>
+      <div>
+        <input id="passwordConfirm" name="passwordConfirm" type="password" >
+      </div>
+    </div>
+    <label for="roles">User Role:</label>
+    <div>
+      <input type="checkbox" id="roles" name="roles" value="Manager"
+      <%=user.roles.includes('Manager')&& 'checked' %>>
+      <label for="roles"> Manager</label><br>
+      <input type="checkbox" id="roles" name="roles" value="Admin"
+      <%=user.roles.includes('Admin')&& 'checked' %>>
+      <label for="roles"> Admin</label><br>
+    </div>
+
+
+  <div>
+    <button
+      id="submitButton"
+      class="btn btn btn-primary"
+      type="submit"
+      value="Submit"
+    >
+      Submit
+    </button>
+  </div>
+</form>
+<p class="error-message inline-block"><%= errorMessage %></p>

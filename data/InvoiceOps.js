@@ -1,12 +1,34 @@
 const { Invoice } = require('../models/Invoice.js');
 const ProductOps = require('./ProductOps.js');
+const userOps = require('./UserOps.js');
 
 class InvoiceOps {
   InvoiceOps() {}
 
-  async getAllInvoices() {
-    const invoices = await Invoice.find({}).sort({ name: 1 });
+  async getAllUserInvoices(username) {
+    const _userOps = new userOps();
+    const userInfo = await _userOps.getUserInfoByUsername(username);
+
+    const invoices = await Invoice.find({
+      'invoiceClient.name': {
+        $regex: `.*${userInfo.user.firstName} ${userInfo.user.lastName}.*`,
+        $options: 'i'
+      }
+    }).sort({ invoiceNumber: 1 });
     return invoices;
+  }
+
+  async getFilteredInvoices(username, filterText) {
+    const _userOps = new userOps();
+    const userInfo = await _userOps.getUserInfoByUsername(username);
+    let result = await Invoice.find({
+      'invoiceClient.name': {
+        $regex: `.*${userInfo.user.firstName} ${userInfo.user.lastName}.*`,
+        $options: 'i'
+      },
+      $text: { $search: filterText }
+    }).sort({ invoiceNumber: 1 });
+    return result;
   }
 
   async getInvoiceById(id) {
@@ -92,13 +114,6 @@ class InvoiceOps {
       products = [product];
     }
     return products;
-  }
-
-  async getFilteredInvoices(filterText) {
-    let result = await Invoice.find({
-      'invoiceClient.name': { $regex: `.*${filterText}.*`, $options: 'i' }
-    });
-    return result;
   }
 }
 

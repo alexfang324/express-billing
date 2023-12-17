@@ -13,7 +13,8 @@ const invoiceSchema = mongoose.Schema(
     },
     invoiceClient: { type: clientSchema, required: true },
     products: [{ type: productSchema, required: true }],
-    quantities: [{ type: Number, required: true }]
+    quantities: [{ type: Number, required: true }],
+    paid: { type: Boolean, required: true, default: false }
   },
   { collection: 'invoices' }
 );

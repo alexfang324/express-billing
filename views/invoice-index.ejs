@@ -17,10 +17,22 @@
 <ul class="model-item-list">
   <% for (let i=0; i < invoices.length; i++) { %>
   <li>
-    <a href="/invoices/<%= invoices[i]._id%>">
-      <%= invoices[i].invoiceNumber%>
-    </a>
-    <div>
+    <div class="flex-row">
+      <a href="/invoices/<%= invoices[i]._id%>">
+        <%= invoices[i].invoiceNumber%>
+      </a>
+      <p class="<%=invoices[i].paid?'green-text':'red-text'%> vertical-align">
+        [<%=invoices[i].paid?'Paid':'Not Paid'%>]
+      </p>
+    </div>
+
+    <div class="flex-row">
+      <form action="/invoices/toggle-paid/<%= invoices[i]._id%>" method="POST">
+        <button class="btn btn-primary" name="mark-paid-btn">
+          mark paid/unpaid
+        </button>
+      </form>
+
       <button
         class="btn btn-success"
         onClick="window.location.href='/invoices/edit/<%= invoices[i]._id%>'"

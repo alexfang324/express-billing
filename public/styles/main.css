@@ -1,11 +1,29 @@
 /* Cross-Page stylings Tags */
-.display-flex {
+.flex-row {
   display: flex;
+  flex-direction: row;
   gap: 10px;
+}
+
+.vertical-align {
+  align-items: center;
+  vertical-align: middle;
 }
 
 .inline-block {
   display: inline-block;
+}
+
+.red-text {
+  color: red;
+}
+
+.green-text {
+  color: green;
+}
+
+.readonly-text {
+  color: grey;
 }
 
 /* General styling */
@@ -34,7 +52,7 @@ body {
   margin: auto;
 }
 
-.model-item-list > li {
+.model-item-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;

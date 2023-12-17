@@ -13,9 +13,12 @@ exports.Index = async function (req, res) {
   const reqInfo = RequestService.getCurrentUser(req);
   let invoices;
   if (filterText) {
-    invoices = await _invoiceOps.getFilteredInvoices(filterText);
+    invoices = await _invoiceOps.getFilteredInvoices(
+      reqInfo.username,
+      filterText
+    );
   } else {
-    invoices = await _invoiceOps.getAllInvoices();
+    invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
   }
 
   res.render('invoice-index', {
@@ -67,7 +70,6 @@ exports.CreateInvoice = async function (req, res) {
   const products = await _invoiceOps.constructInvoiceProducts(productIds);
 
   let formObj = new Invoice({
-    reqInfo,
     invoiceId: null,
     invoiceNumber: req.body.invoiceNumber,
     invoiceDate: req.body.invoiceDate,
@@ -80,7 +82,7 @@ exports.CreateInvoice = async function (req, res) {
   const response = await _invoiceOps.createInvoice(formObj);
 
   if (response.errorMsg == '') {
-    const invoices = await _invoiceOps.getAllInvoices();
+    const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
     res.render('invoice-index', {
       title: 'Invoices',
       reqInfo,
@@ -150,7 +152,7 @@ exports.EditInvoice = async function (req, res) {
 
   // if no errors, it was udpated and save to db successfully
   if (response.errorMsg == '') {
-    const invoices = await _invoiceOps.getAllInvoices();
+    const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
     res.render('invoice-index', {
       title: 'Invoices',
       reqInfo,
@@ -181,7 +183,7 @@ exports.DeleteInvoiceById = async function (req, res) {
   const reqInfo = RequestService.getCurrentUser(req);
   const invoiceId = req.params.id;
   let deletedInvoice = await _invoiceOps.deleteInvoiceById(invoiceId);
-  let invoices = await _invoiceOps.getAllInvoices();
+  const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
 
   if (deletedInvoice) {
     res.render('invoice-index', {
@@ -200,4 +202,38 @@ exports.DeleteInvoiceById = async function (req, res) {
       errorMessage: 'Error.  Unable to Delete'
     });
   }
+};
+
+exports.TooglePaid = async (req, res) => {
+  const reqInfo = RequestService.getCurrentUser(req);
+  const filterText = req.query.filterText ?? '';
+  const invoiceId = req.params.id;
+  const invoice = await _invoiceOps.getInvoiceById(invoiceId);
+  //calculate new paid status and update it to the database
+  const updateObj = { paid: invoice.paid ? false : true };
+  response = await _invoiceOps.updateInvoiceById(invoiceId, updateObj);
+
+  // if error, set a general error message to return to user
+  let errorMessage = '';
+  if (response.errorMsg != '') {
+    errorMessage = "An error occured, can't change invoice paid status";
+  }
+  //if filterText was used, maintain the filtered result
+  let invoices;
+  if (filterText) {
+    invoices = await _invoiceOps.getFilteredInvoices(
+      reqInfo.username,
+      filterText
+    );
+  } else {
+    invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
+  }
+
+  res.render('invoice-index', {
+    title: 'Invoices',
+    reqInfo,
+    invoices,
+    filterText: '',
+    errorMessage
+  });
 };

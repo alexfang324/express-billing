@@ -66,7 +66,7 @@ app.use('/', indexRouter);
 app.use('/products', productRouter);
 app.use('/clients', clientRouter);
 app.use('/invoices', invoiceRouter);
-app.use('/user', userRouter);
+app.use('/users', userRouter);
 
 //the catch all error page
 app.all('/*', (req, res) => {

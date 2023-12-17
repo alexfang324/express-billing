@@ -1,0 +1,16 @@
+<h1>Profile</h1>
+
+Username: <%= user.username %><br />
+Name: <%= user.firstName %> <%= user.lastName %><br />
+Email: <%= user.email %><br />
+
+<% if(user.roles?.length) { %>
+<p>Roles: <%= user.roles %></p>
+<% } %>
+
+<button
+  class="btn btn-primary"
+  onClick="window.location.href='/users/edit/<%= user.username%>'"
+>
+  Edit
+</button>

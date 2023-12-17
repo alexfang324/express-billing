@@ -1,0 +1,37 @@
+<h1>Users</h1>
+<p class="error-message"><%= errorMessage %></p>
+<form class="user-filter-form" action="/users" method="GET">
+  <label for="filterText">Filter Text:</label>
+  <input
+    id="filter-text"
+    name="filterText"
+    type="text"
+    value="<%=filterText?? '' %>"
+  />
+  <button class="btn btn-success" type="submit" value="Submit">Filter</button>
+</form>
+<button class="btn btn-primary" onClick="window.location.href='/users/edit'">
+  Create User
+</button>
+<ul class="model-item-list">
+  <% for (let i=0; i < users.length; i++) { %>
+  <li>
+    <a href="/users/<%= users[i].username%>"> <%=users[i].username%>%> </a>
+    <span></span>
+    <div>
+      <button
+        class="btn btn-success"
+        onClick="window.location.href='/users/edit/<%= users[i].username%>'"
+      >
+        edit
+      </button>
+      <button
+        class="btn btn-danger"
+        onClick="window.location.href='/users/<%= users[i].username%>/delete'"
+      >
+        delete
+      </button>
+    </div>
+  </li>
+  <% } %>
+</ul>

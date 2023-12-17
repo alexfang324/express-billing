@@ -9,4 +9,5 @@ invoiceRouter.get('/edit/:id', InvoiceController.Edit);
 invoiceRouter.post('/edit/:id', InvoiceController.EditInvoice);
 invoiceRouter.get('/:id', InvoiceController.Detail);
 invoiceRouter.get('/:id/delete', InvoiceController.DeleteInvoiceById);
+invoiceRouter.post('/toggle-paid/:id', InvoiceController.TooglePaid);
 module.exports = invoiceRouter;
