@@ -53,6 +53,7 @@
         <input id="passwordConfirm" name="passwordConfirm" type="password" >
       </div>
     </div>
+    <% if (reqInfo.roles.includes('Admin')) {%>
     <label for="roles">User Role:</label>
     <div>
       <input type="checkbox" id="roles" name="roles" value="Manager"
@@ -62,6 +63,7 @@
       <%=user.roles.includes('Admin')&& 'checked' %>>
       <label for="roles"> Admin</label><br>
     </div>
+    <%}%>
 
 
   <div>

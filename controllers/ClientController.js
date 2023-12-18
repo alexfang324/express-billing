@@ -5,7 +5,7 @@ const RequestService = require('../services/RequestService');
 const _clientOps = new ClientOps();
 
 exports.Index = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const filterText = req.query.filterText ?? '';
   let clients;
   if (filterText) {
@@ -24,7 +24,7 @@ exports.Index = async function (req, res) {
 };
 
 exports.Edit = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const clientId = req.params.id;
   let clientObj = await _clientOps.getClientById(clientId);
   res.render('client-form', {
@@ -37,7 +37,7 @@ exports.Edit = async function (req, res) {
 };
 
 exports.EditClient = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const clientId = req.body.client_id;
   const name = req.body.name;
   const code = req.body.code;
@@ -77,7 +77,7 @@ exports.EditClient = async function (req, res) {
 
 // Handle profile form GET request
 exports.Create = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   res.render('client-form', {
     title: 'Create Client',
     reqInfo,
@@ -89,7 +89,7 @@ exports.Create = async function (req, res) {
 
 // Handle profile form Post request
 exports.CreateClient = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   let tempClientObj = new Client({
     name: req.body.name,
     code: req.body.code,
@@ -119,7 +119,7 @@ exports.CreateClient = async function (req, res) {
 };
 
 exports.DeleteClientById = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const clientId = req.params.id;
   let deletedClient = await _clientOps.deleteClientById(clientId);
   let clients = await _clientOps.getAllClients();
@@ -143,7 +143,7 @@ exports.DeleteClientById = async function (req, res) {
 };
 
 exports.Detail = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const clientId = req.params.id;
   let client = await _clientOps.getClientById(clientId);
   if (client) {

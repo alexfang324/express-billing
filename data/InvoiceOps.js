@@ -10,8 +10,8 @@ class InvoiceOps {
     const userInfo = await _userOps.getUserInfoByUsername(username);
 
     const invoices = await Invoice.find({
-      'invoiceClient.name': {
-        $regex: `.*${userInfo.user.firstName} ${userInfo.user.lastName}.*`,
+      'invoiceClient.email': {
+        $regex: `.*${userInfo.user.email}.*`,
         $options: 'i'
       }
     }).sort({ invoiceNumber: 1 });
@@ -23,7 +23,7 @@ class InvoiceOps {
     const userInfo = await _userOps.getUserInfoByUsername(username);
     let result = await Invoice.find({
       'invoiceClient.name': {
-        $regex: `.*${userInfo.user.firstName} ${userInfo.user.lastName}.*`,
+        $regex: `.*${userInfo.user.email}.*`,
         $options: 'i'
       },
       $text: { $search: filterText }

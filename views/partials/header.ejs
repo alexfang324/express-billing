@@ -2,13 +2,14 @@
   <nav>
     <ul>
       <li><a href="/">Home</a></li>
-      <% if(reqInfo.roles && reqInfo.roles.includes('Admin')){ %>
+      <% if(reqInfo && reqInfo.roles && reqInfo.roles.includes('Admin')){ %>
       <li><a href="/products">Products</a></li>
-      <% } %> <% if (reqInfo.roles &&
+      <% } %> <% if (reqInfo && reqInfo.roles &&
       reqInfo.roles.some((role=>['Admin','Manager'].includes(role)))){ %>
       <li><a href="/clients">Clients</a></li>
       <li><a href="/users">Users</a></li>
-      <% } %> <% if(reqInfo.roles && reqInfo.roles.includes('Registered')){ %>
+      <% } %> <% if(reqInfo && reqInfo.roles &&
+      reqInfo.roles.includes('Registered')){ %>
       <li><a href="/invoices">Invoices</a></li>
       <li><a href="/users/<%=reqInfo.username%>">Profile</a></li>
       <% } %>
@@ -18,7 +19,7 @@
     <a href="/users/register">Register</a> |
 
     <!-- Show 'Logout' and user name if authenticated. -->
-    <%if (reqInfo.authenticated) { %>
+    <%if (reqInfo && reqInfo.authenticated) { %>
     <a href="/users/logout">Logout</a> [<%= reqInfo.username %>]
 
     <!-- 'else' must be in separate section with curly brackets to work. -->

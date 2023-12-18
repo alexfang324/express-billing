@@ -9,8 +9,8 @@ const _clientOps = new ClientOps();
 const _productOps = new ProductOps();
 
 exports.Index = async function (req, res) {
+  const reqInfo = RequestService.checkUserAuth(req, res, ['Manager', 'Admin']);
   const filterText = req.query.filterText ?? '';
-  const reqInfo = RequestService.getCurrentUser(req);
   let invoices;
   if (filterText) {
     invoices = await _invoiceOps.getFilteredInvoices(
@@ -31,7 +31,7 @@ exports.Index = async function (req, res) {
 };
 
 exports.Detail = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const invoice = await _invoiceOps.getInvoiceById(req.params.id);
   let invoiceTotal = 0;
   invoice.products.forEach((product, i) => {
@@ -47,7 +47,7 @@ exports.Detail = async function (req, res) {
 };
 
 exports.Create = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const clientList = await _clientOps.getAllClients();
   const productList = await _productOps.getAllProducts();
   res.render('invoice-form', {
@@ -63,7 +63,7 @@ exports.Create = async function (req, res) {
 };
 
 exports.CreateInvoice = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const invoiceClient = await _clientOps.getClientById(req.body.clientId);
   const productIds = req.body['productId[]'];
   const quantities = req.body['quantity[]'];
@@ -110,7 +110,7 @@ exports.CreateInvoice = async function (req, res) {
 };
 
 exports.Edit = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const clientList = await _clientOps.getAllClients();
   const productList = await _productOps.getAllProducts();
   const invoiceId = req.params.id;
@@ -128,7 +128,7 @@ exports.Edit = async function (req, res) {
 };
 
 exports.EditInvoice = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const invoiceId = req.body.invoiceId;
   const invoiceClient = await _clientOps.getClientById(req.body.clientId);
 
@@ -180,7 +180,7 @@ exports.EditInvoice = async function (req, res) {
 };
 
 exports.DeleteInvoiceById = async function (req, res) {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const invoiceId = req.params.id;
   let deletedInvoice = await _invoiceOps.deleteInvoiceById(invoiceId);
   const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
@@ -205,7 +205,7 @@ exports.DeleteInvoiceById = async function (req, res) {
 };
 
 exports.TooglePaid = async (req, res) => {
-  const reqInfo = RequestService.getCurrentUser(req);
+  const reqInfo = RequestService.checkUserAuth(req);
   const filterText = req.query.filterText ?? '';
   const invoiceId = req.params.id;
   const invoice = await _invoiceOps.getInvoiceById(invoiceId);
