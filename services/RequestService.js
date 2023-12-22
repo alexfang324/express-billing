@@ -3,15 +3,13 @@ class RequestService {
   RequestService() {}
 
   checkUserAuth = (req, res, permittedRoles = []) => {
-    console.log('resssssssss: ', res);
-
     // restrict permissions by default
     let rolePermitted = false;
 
-    // Send username and login status to view if authenticated.
+    // check if user is authenticated
     if (req.isAuthenticated()) {
+      //if user has a role, check it against the permitted roles for this page
       if (req.session.roles) {
-        // check if the user's roles matches any of the permitted roles for this resource
         let matchingRoles = req.session.roles?.filter((role) =>
           permittedRoles.includes(role)
         );
@@ -21,29 +19,37 @@ class RequestService {
       } else {
         req.session.roles = [];
       }
+      //if permitted role is empty, an authenticated user is also authorized to visit that page
+      if (permittedRoles.length === 0) {
+        rolePermitted = true;
+      }
 
-      //if not authorized, redirect to login page with error message
+      //if authorized, return with authentication and authorization information
       if (rolePermitted) {
         return {
           authenticated: true,
           username: req.user.username,
           roles: req.session.roles,
-          rolePermitted: rolePermitted
+          rolePermitted
         };
       } else {
+        //if not authorized, redirect to login page with error message
         res.redirect(
           `/users/login?errorMessage=You must be a ${permittedRoles.join(
             '/'
-          )} user to access this area.`
+          )} user to access this area`
         );
         return {
-          rolePermitted: false,
-          authorized: false
+          authenticated: true,
+          username: req.user.username,
+          roles: req.session.roles,
+          rolePermitted: false
         };
       }
     } else {
+      //not authenticated, return to login page with error message
       res.redirect(
-        `/users/login?errorMessage=You must login to access this area.`
+        `/users/login?errorMessage=You must login to access this area`
       );
       return {
         authenticated: false,

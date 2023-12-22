@@ -6,12 +6,11 @@ const UserOps = require('../data/UserOps');
 const _userOps = new UserOps();
 
 exports.Register = async = (req, res) => {
-  let reqInfo = RequestService.checkUserAuth(req);
   res.render('register', {
     title: 'Registration',
     errorMessage: '',
     user: {},
-    reqInfo: reqInfo
+    reqInfo: {}
   });
 };
 
@@ -35,8 +34,9 @@ exports.RegisterUser = async (req, res) => {
     User.register(newUser, req.body.password, (err, account) => {
       // Show registration form with errors if fail.
       if (err) {
-        let reqInfo = RequestService.checkUserAuth(req);
+        let reqInfo = RequestService.checkUserAuth(req, res);
         return res.render('register', {
+          title: 'Registration',
           user: newUser,
           errorMessage: err,
           reqInfo: reqInfo
@@ -49,8 +49,9 @@ exports.RegisterUser = async (req, res) => {
       });
     });
   } else {
-    let reqInfo = RequestService.checkUserAuth(req);
+    let reqInfo = RequestService.checkUserAuth(req, res);
     res.render('register', {
+      title: 'Registration',
       user: {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -64,21 +65,43 @@ exports.RegisterUser = async (req, res) => {
 };
 
 exports.Login = async (req, res) => {
-  let reqInfo = RequestService.checkUserAuth(req);
   let errorMessage = req.query.errorMessage;
   res.render('login', {
     title: 'Login',
     user: {},
     errorMessage: errorMessage,
-    reqInfo: reqInfo
+    reqInfo: {}
   });
 };
 
+// exports.LoginUser = async (req, res, next) => {
+//   passport.authenticate(
+//     'local',
+//     {
+//       successRedirect: `/users/${req.body.username}`,
+//       failureRedirect: '/users/login?errorMessage=Invalid login.'
+//     },
+//     function () {
+//       req.session.save(() => {
+//         setTimeout(() => {
+//           res.redirect(`/users/${req.body.username}`);
+//         }, 1);
+//       });
+//     }
+//   )(req, res, next);
+// };
+
 exports.LoginUser = async (req, res, next) => {
-  let reqInfo = RequestService.checkUserAuth(req);
-  passport.authenticate('local', {
-    successRedirect: `/users/${req.body.username}`,
-    failureRedirect: '/users/login?errorMessage=Invalid login.'
+  passport.authenticate('local', (err, user) => {
+    if (err) {
+      res.redirect('/users/login?errorMessage=Invalid login.');
+      return;
+    }
+    req.logIn(user, (err) => {
+      req.session.save(() => {
+        res.redirect(`/users/${req.body.username}`);
+      });
+    });
   })(req, res, next);
 };
 
@@ -89,7 +112,7 @@ exports.Logout = (req, res) => {
       return next(err);
     } else {
       // logged out. Update the reqInfo and redirect to the login page
-      let reqInfo = RequestService.checkUserAuth(req);
+      let reqInfo = RequestService.checkUserAuth(req, res);
       res.render('index', {
         title: 'Home',
         user: {},
@@ -121,24 +144,22 @@ exports.Index = async (req, res) => {
 };
 
 exports.UserDetail = async (req, res) => {
-  let reqInfo = RequestService.checkUserAuth(req);
-  if (reqInfo.authenticated) {
-    let roles = await _userOps.getRolesByUsername(reqInfo.username);
-    //add user role to req.session and reqInfo to use in further browsing
-    let sessionData = req.session;
-    sessionData.roles = roles;
-    reqInfo.roles = roles;
-    let userInfo = await _userOps.getUserInfoByUsername(req.params.username);
-    return res.render('user-detail', {
-      title: 'Profile',
-      reqInfo,
-      user: userInfo.user
-    });
-  } else {
-    res.redirect(
-      '/users/login?errorMessage=You must be logged in to view this page.'
-    );
+  let reqInfo = RequestService.checkUserAuth(req, res);
+  if (!reqInfo.authenticated) {
+    return res;
   }
+
+  let roles = await _userOps.getRolesByUsername(reqInfo.username);
+  //add user role to req.session and reqInfo to use in further browsing
+  let sessionData = req.session;
+  sessionData.roles = roles;
+  reqInfo.roles = roles;
+  let userInfo = await _userOps.getUserInfoByUsername(req.params.username);
+  return res.render('user-detail', {
+    title: 'Profile',
+    reqInfo,
+    user: userInfo.user
+  });
 };
 
 exports.Create = async (req, res) => {
