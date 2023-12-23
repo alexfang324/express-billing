@@ -5,6 +5,10 @@
   gap: 10px;
 }
 
+.align-top {
+  align-items: top;
+}
+
 .vertical-align {
   align-items: center;
   vertical-align: middle;
@@ -39,6 +43,10 @@ body {
   width: 80vw;
   position: relative;
   margin: 0 auto;
+}
+
+button {
+  margin-top: 10px;
 }
 
 .error-message {
@@ -113,10 +121,6 @@ footer {
 }
 
 /* Client Page Stylings */
-#submitButton {
-  margin-top: 10px;
-}
-
 #email {
   margin-right: 37px;
 }

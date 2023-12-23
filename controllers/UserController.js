@@ -156,7 +156,7 @@ exports.Create = async (req, res) => {
     );
   }
 
-  res.render('user-form', {
+  res.render('user-create-form', {
     title: 'Create User',
     reqInfo,
     user: {},
@@ -174,7 +174,7 @@ exports.CreateUser = async (req, res) => {
     );
   }
 
-  const password = req.body.newPassword;
+  const password = req.body.password;
   const passwordConfirm = req.body.passwordConfirm;
   const userRoles = req.body.roles;
   let roles = ['Registered'];
@@ -196,7 +196,7 @@ exports.CreateUser = async (req, res) => {
     User.register(newUser, password, (err, account) => {
       // Show user form with errors if fail.
       if (err) {
-        return res.render('user-form', {
+        return res.render('user-create-form', {
           title: 'Create User',
           reqInfo,
           user: newUser,
@@ -209,7 +209,7 @@ exports.CreateUser = async (req, res) => {
       }
     });
   } else {
-    res.render('user-form', {
+    res.render('user-create-form', {
       title: 'Create User',
       reqInfo,
       user: newUser,
@@ -232,7 +232,7 @@ exports.Edit = async (req, res) => {
   }
 
   let userInfo = await _userOps.getUserInfoByUsername(req.params.username);
-  return res.render('user-form', {
+  return res.render('user-edit-form', {
     title: 'Edit User',
     reqInfo,
     user: userInfo.user,
@@ -241,7 +241,7 @@ exports.Edit = async (req, res) => {
   });
 };
 
-exports.EditUser = async (req, res) => {
+exports.EditUserInfo = async (req, res) => {
   let reqInfo = RequestService.checkUserAuth(req);
   //redirect to login page if user not logged in, not a manager or admin, or editing his/her
   //own profile
@@ -275,28 +275,50 @@ exports.EditUser = async (req, res) => {
 
   //if there is error, direct to edit form with error
   if (response.errorMsg != '') {
-    return res.render('user-form', {
+    return res.render('user-edit-form', {
       title: 'Edit User',
       reqInfo,
       user: userInfo.user,
       username: userInfo.user.username,
       errorMessage: response.errorMsg
     });
+  } else {
+    //no error, redirect to user profile page
+    reqInfo = RequestService.checkUserAuth(req);
+    userInfo = await _userOps.getUserInfoByUsername(req.params.username);
+    return res.render('user-detail', {
+      title: 'Profile',
+      reqInfo,
+      user: userInfo.user
+    });
+  }
+};
+
+exports.EditUserPassword = async (req, res) => {
+  let reqInfo = RequestService.checkUserAuth(req);
+  userInfo = await _userOps.getUserInfoByUsername(req.params.username);
+  //redirect to login page if user not logged in, not a manager or admin, or editing his/her
+  //own profile
+  if (
+    !reqInfo.authenticated ||
+    (!reqInfo.roles.some((role) => ['Admin', 'Manager'].includes(role)) &&
+      req.params.username !== reqInfo.username)
+  ) {
+    res.redirect(
+      `/users/login?errorMessage=You do not have authority to change the password`
+    );
   }
 
-  //if no error, check if we need to update password as well
-  const oldPassword = req.body.oldPassword ?? null;
+  const oldPassword = req.body.oldPassword;
   const newPassword = req.body.newPassword;
   const passwordConfirm = req.body.passwordConfirm;
-  //get the newest userInfo
-  userInfo = await _userOps.getUserInfoByUsername(req.params.username);
 
   //only consider update password if new password fields are not empty
   if (newPassword != '' || passwordConfirm != '') {
     //if old password is given but is empty, return with error message
     if (oldPassword === '') {
       const errorMessage = 'You must enter your current password';
-      return res.render('user-form', {
+      return res.render('user-edit-form', {
         title: 'Edit User',
         reqInfo,
         user: userInfo.user,
@@ -308,7 +330,7 @@ exports.EditUser = async (req, res) => {
     //if the new passwords do not match, return with error
     if (newPassword !== passwordConfirm) {
       const errorMessage = 'The new passwords do not match';
-      return res.render('user-form', {
+      return res.render('user-edit-form', {
         title: 'Edit User',
         reqInfo,
         user: userInfo.user,
@@ -324,7 +346,7 @@ exports.EditUser = async (req, res) => {
       if (err) {
         const errorMessage = 'Current password enter is incorrect';
         console.log('error: ', err);
-        return res.render('user-form', {
+        return res.render('user-edit-form', {
           title: 'Edit User',
           reqInfo,
           user: userInfo.user,
@@ -340,15 +362,6 @@ exports.EditUser = async (req, res) => {
           user: userInfo.user
         });
       }
-    });
-    //if no new password is given, get latest reqInfo and userInfo then go back to user detail page
-  } else {
-    reqInfo = RequestService.checkUserAuth(req);
-    userInfo = await _userOps.getUserInfoByUsername(req.params.username);
-    return res.render('user-detail', {
-      title: 'Profile',
-      reqInfo,
-      user: userInfo.user
     });
   }
 };

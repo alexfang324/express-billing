@@ -1,8 +1,7 @@
 <a href="/users">Return to Users</a>
-<h3><%= username ? "Edit" : "New" %> User</h3>
-
-<form action="/users/edit/<%=username?username:''%>" method="POST">
-  <div>
+<h3>Edit User</h3>
+<div class="display-flex">
+<form action="/users/edit-info/<%=username%>" method="POST" class="inline-block align-top">
     <div>
       <label for="firstName">First Name:</label>
       <div>
@@ -21,36 +20,15 @@
       <label id="email" for="email">Email:</label>
       <div>
         <input id="email" name="email" type="text" class="<%=username?'readonly-text':''%>"
-        value="<%=user.email?user.email:''%>" <%= username? 'readonly':''%> required >
+        value="<%=user.email?user.email:''%>" readonly >
       </div>
     </div>
     <div>
       <label id="username" for="username">Username:</label>
       <div>
-        <input id="username" name="username" type="text" class="<%=username?'readonly-text':''%>"
+        <input id="username" name="username" type="text" class="readonly-text"
         value="<%=user.username?user.username:''%>" 
-        <%= username? 'readonly':''%> required>
-      </div>
-    </div>
-    <% if (username) { %>
-    <div>
-      <label for="oldPassword">Old Password:</label>
-      <div>
-        <input id="oldPassword" name="oldPpassword" type="password" >
-      </div>
-    </div>
-    <% } %>
-    <div>
-    <div>
-      <label for="newPassword"><%= username? 'New Password':'Password' %>:</label>
-      <div>
-        <input id="newPassword" name="newPassword" type="password" >
-      </div>
-    </div>
-    <div>
-      <label for="passwordConfirm"> Confirm Password:</label>
-      <div>
-        <input id="passwordConfirm" name="passwordConfirm" type="password" >
+       readonly>
       </div>
     </div>
     <% if (reqInfo.roles.includes('Admin')) {%>
@@ -65,16 +43,45 @@
     </div>
     <%}%>
 
-
   <div>
     <button
-      id="submitButton"
+      id="submitInfoButton"
       class="btn btn btn-primary"
       type="submit"
       value="Submit"
     >
-      Submit
+      Update Info
     </button>
   </div>
 </form>
+<form action="/users/edit-pwd/<%=username%>" method="POST" class="inline-block align-top">
+  <div>
+    <label for="oldPassword">Old Password:</label>
+    <div>
+      <input id="oldPassword" name="oldPassword" type="password" >
+    </div>
+  </div>
+  <div>
+  <div>
+    <label for="newPassword">New Password:</label>
+    <div>
+      <input id="newPassword" name="newPassword" type="password" >
+    </div>
+  </div>
+  <div>
+    <label for="passwordConfirm"> Confirm Password:</label>
+    <div>
+      <input id="passwordConfirm" name="passwordConfirm" type="password" >
+    </div>
+  </div>
+    <button
+      id="submitPwdButton"
+      class="btn btn btn-primary"
+      type="submit"
+      value="Submit"
+    >
+      Update Password
+    </button>
+</form>
+</div>
 <p class="error-message inline-block"><%= errorMessage %></p>

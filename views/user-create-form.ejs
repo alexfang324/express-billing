@@ -1,0 +1,71 @@
+<a href="/users">Return to Users</a>
+<h3>New User</h3>
+
+<form action="/users/edit" method="POST">
+  <div>
+    <div>
+      <label for="firstName">First Name:</label>
+      <div>
+        <input id="firstName" name="firstName" type="text"
+        value="<%=user.firstName?user.firstName:''%>" required>
+      </div>
+    </div>
+    <div>
+      <label for="lastName">Last Name:</label>
+      <div>
+        <input id="lastName" name="lastName" type="text"
+        value="<%=user.lastName?user.lastName:''%>" required>
+      </div>
+    </div>
+    <div>
+      <label id="email" for="email">Email:</label>
+      <div>
+        <input id="email" name="email" type="text" 
+        value="<%=user.email?user.email:''%>" required >
+      </div>
+    </div>
+    <div>
+      <label id="username" for="username">Username:</label>
+      <div>
+        <input id="username" name="username" type="text" 
+        value="<%=user.username?user.username:''%>" required>
+      </div>
+    </div>
+    <div>
+    <div>
+      <label for="password"><%= username? 'Password':'Password' %>:</label>
+      <div>
+        <input id="password" name="password" type="password" >
+      </div>
+    </div>
+    <div>
+      <label for="passwordConfirm"> Confirm Password:</label>
+      <div>
+        <input id="passwordConfirm" name="passwordConfirm" type="password" >
+      </div>
+    </div>
+    <% if (reqInfo.roles.includes('Admin')) {%>
+    <label for="roles">User Role:</label>
+    <div>
+      <input type="checkbox" id="roles" name="roles" value="Manager"
+      <%=user.roles && user.roles.includes('Manager') && 'checked' %>>
+      <label> Manager</label><br>
+      <input type="checkbox" id="roles" name="roles" value="Admin"
+      <%=user.roles && user.roles.includes('Admin') && 'checked' %>>
+      <label> Admin</label><br>
+    </div>
+    <%}%>
+
+
+  <div>
+    <button
+      id="submitButton"
+      class="btn btn btn-primary"
+      type="submit"
+      value="Submit"
+    >
+      Submit
+    </button>
+  </div>
+</form>
+<p class="error-message inline-block"><%= errorMessage %></p>

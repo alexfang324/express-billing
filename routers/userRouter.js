@@ -11,7 +11,8 @@ userRouter.get('/logout', UserController.Logout);
 userRouter.get('/edit', UserController.Create);
 userRouter.post('/edit', UserController.CreateUser);
 userRouter.get('/edit/:username', UserController.Edit);
-userRouter.post('/edit/:username', UserController.EditUser);
+userRouter.post('/edit-info/:username', UserController.EditUserInfo);
+userRouter.post('/edit-pwd/:username', UserController.EditUserPassword);
 userRouter.get('/:username', UserController.UserDetail);
 userRouter.get('/:username/delete', UserController.DeleteUserByUsername);
 
