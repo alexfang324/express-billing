@@ -2,23 +2,36 @@ const { Invoice } = require('../models/Invoice');
 const InvoiceOps = require('../data/InvoiceOps');
 const ClientOps = require('../data/ClientOps');
 const ProductOps = require('../data/ProductOps');
+const UserOps = require('../data/UserOps');
+
 const RequestService = require('../services/RequestService');
 
 const _invoiceOps = new InvoiceOps();
 const _clientOps = new ClientOps();
 const _productOps = new ProductOps();
+const _userOps = new UserOps();
 
 exports.Index = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req, res, ['Manager', 'Admin']);
+  let reqInfo = RequestService.checkUserAuth(req);
+  if (!reqInfo.authenticated) {
+    res.redirect(
+      `/users/login?errorMessage=You must login to access this area`
+    );
+  }
+
   const filterText = req.query.filterText ?? '';
+
+  //if user is manager or admin, do not filter invoice by username
+  const filterUser = reqInfo.roles.some((role) =>
+    ['Admin', 'Manager'].includes(role)
+  )
+    ? null
+    : reqInfo.username;
   let invoices;
   if (filterText) {
-    invoices = await _invoiceOps.getFilteredInvoices(
-      reqInfo.username,
-      filterText
-    );
+    invoices = await _invoiceOps.getFilteredInvoices(filterUser, filterText);
   } else {
-    invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
+    invoices = await _invoiceOps.getAllUserInvoices(filterUser);
   }
 
   res.render('invoice-index', {
@@ -31,8 +44,20 @@ exports.Index = async function (req, res) {
 };
 
 exports.Detail = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
   const invoice = await _invoiceOps.getInvoiceById(req.params.id);
+  const userInfo = await _userOps.getUserInfoByUsername(reqInfo.username);
+
+  if (
+    !reqInfo.rolePermitted &&
+    userInfo.user.email !== invoice.invoiceClient.email
+  ) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to see this invoice`
+    );
+  }
+
   let invoiceTotal = 0;
   invoice.products.forEach((product, i) => {
     invoiceTotal += product.unit_cost * invoice.quantities[i];
@@ -47,7 +72,14 @@ exports.Detail = async function (req, res) {
 };
 
 exports.Create = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const clientList = await _clientOps.getAllClients();
   const productList = await _productOps.getAllProducts();
   res.render('invoice-form', {
@@ -63,7 +95,14 @@ exports.Create = async function (req, res) {
 };
 
 exports.CreateInvoice = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const invoiceClient = await _clientOps.getClientById(req.body.clientId);
   const productIds = req.body['productId[]'];
   const quantities = req.body['quantity[]'];
@@ -82,7 +121,12 @@ exports.CreateInvoice = async function (req, res) {
   const response = await _invoiceOps.createInvoice(formObj);
 
   if (response.errorMsg == '') {
-    const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
+    const filterUser = reqInfo.roles.some((role) =>
+      permittedRoles.includes(role)
+    )
+      ? null
+      : reqInfo.username;
+    const invoices = await _invoiceOps.getAllUserInvoices(filterUser);
     res.render('invoice-index', {
       title: 'Invoices',
       reqInfo,
@@ -110,7 +154,14 @@ exports.CreateInvoice = async function (req, res) {
 };
 
 exports.Edit = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const clientList = await _clientOps.getAllClients();
   const productList = await _productOps.getAllProducts();
   const invoiceId = req.params.id;
@@ -128,13 +179,18 @@ exports.Edit = async function (req, res) {
 };
 
 exports.EditInvoice = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const invoiceId = req.body.invoiceId;
   const invoiceClient = await _clientOps.getClientById(req.body.clientId);
-
   const productIds = req.body['productId[]'];
   const quantities = req.body['quantity[]'];
-
   const products = await _invoiceOps.constructInvoiceProducts(productIds);
 
   let formObj = {
@@ -152,7 +208,12 @@ exports.EditInvoice = async function (req, res) {
 
   // if no errors, it was udpated and save to db successfully
   if (response.errorMsg == '') {
-    const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
+    const filterUser = reqInfo.roles.some((role) =>
+      permittedRoles.includes(role)
+    )
+      ? null
+      : reqInfo.username;
+    const invoices = await _invoiceOps.getAllUserInvoices(filterUser);
     res.render('invoice-index', {
       title: 'Invoices',
       reqInfo,
@@ -180,10 +241,20 @@ exports.EditInvoice = async function (req, res) {
 };
 
 exports.DeleteInvoiceById = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const invoiceId = req.params.id;
   let deletedInvoice = await _invoiceOps.deleteInvoiceById(invoiceId);
-  const invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
+  const filterUser = reqInfo.roles.some((role) => permittedRoles.includes(role))
+    ? null
+    : reqInfo.username;
+  const invoices = await _invoiceOps.getAllUserInvoices(filterUser);
 
   if (deletedInvoice) {
     res.render('invoice-index', {
@@ -205,8 +276,23 @@ exports.DeleteInvoiceById = async function (req, res) {
 };
 
 exports.TooglePaid = async (req, res) => {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const filterText = req.query.filterText ?? '';
+
+  //if user is manager or admin, do not filter invoice by username
+  const filterUser = reqInfo.roles.some((role) =>
+    ['Admin', 'Manager'].includes(role)
+  )
+    ? null
+    : reqInfo.username;
+
   const invoiceId = req.params.id;
   const invoice = await _invoiceOps.getInvoiceById(invoiceId);
   //calculate new paid status and update it to the database
@@ -221,12 +307,9 @@ exports.TooglePaid = async (req, res) => {
   //if filterText was used, maintain the filtered result
   let invoices;
   if (filterText) {
-    invoices = await _invoiceOps.getFilteredInvoices(
-      reqInfo.username,
-      filterText
-    );
+    invoices = await _invoiceOps.getFilteredInvoices(filterUser, filterText);
   } else {
-    invoices = await _invoiceOps.getAllUserInvoices(reqInfo.username);
+    invoices = await _invoiceOps.getAllUserInvoices(filterUser);
   }
 
   res.render('invoice-index', {

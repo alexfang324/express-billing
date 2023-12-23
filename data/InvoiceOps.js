@@ -5,30 +5,45 @@ const userOps = require('./UserOps.js');
 class InvoiceOps {
   InvoiceOps() {}
 
-  async getAllUserInvoices(username) {
+  //If username is empty, get invoices for all users
+  async getAllUserInvoices(username = null) {
     const _userOps = new userOps();
-    const userInfo = await _userOps.getUserInfoByUsername(username);
+    let invoices;
+    if (username) {
+      const userInfo = await _userOps.getUserInfoByUsername(username);
 
-    const invoices = await Invoice.find({
-      'invoiceClient.email': {
-        $regex: `.*${userInfo.user.email}.*`,
-        $options: 'i'
-      }
-    }).sort({ invoiceNumber: 1 });
+      invoices = await Invoice.find({
+        'invoiceClient.email': {
+          $regex: `.*${userInfo.user.email}.*`,
+          $options: 'i'
+        }
+      }).sort({ invoiceNumber: 1 });
+    } else {
+      invoices = await Invoice.find({}).sort({ invoiceNumber: 1 });
+    }
+
     return invoices;
   }
 
-  async getFilteredInvoices(username, filterText) {
+  async getFilteredInvoices(username = null, filterText) {
     const _userOps = new userOps();
-    const userInfo = await _userOps.getUserInfoByUsername(username);
-    let result = await Invoice.find({
-      'invoiceClient.name': {
-        $regex: `.*${userInfo.user.email}.*`,
-        $options: 'i'
-      },
-      $text: { $search: filterText }
-    }).sort({ invoiceNumber: 1 });
-    return result;
+    let invoices;
+    if (username) {
+      const userInfo = await _userOps.getUserInfoByUsername(username);
+      invoices = await Invoice.find({
+        'invoiceClient.name': {
+          $regex: `.*${userInfo.user.email}.*`,
+          $options: 'i'
+        },
+        $text: { $search: filterText }
+      }).sort({ invoiceNumber: 1 });
+    } else {
+      invoices = await Invoice.find({
+        $text: { $search: filterText }
+      }).sort({ invoiceNumber: 1 });
+    }
+
+    return invoices;
   }
 
   async getInvoiceById(id) {

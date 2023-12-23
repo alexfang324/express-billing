@@ -10,7 +10,6 @@ class UserData {
   }
 
   async getFilteredUsers(filterText) {
-    const _userOps = new userOps();
     let result = await User.find({
       username: {
         $regex: `.*${filterText}.*`,

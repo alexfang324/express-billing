@@ -5,7 +5,13 @@ const RequestService = require('../services/RequestService');
 const _clientOps = new ClientOps();
 
 exports.Index = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
   const filterText = req.query.filterText ?? '';
   let clients;
   if (filterText) {
@@ -23,8 +29,97 @@ exports.Index = async function (req, res) {
   });
 };
 
+exports.Detail = async function (req, res) {
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
+  const clientId = req.params.id;
+  let client = await _clientOps.getClientById(clientId);
+  if (client) {
+    res.render('client-detail', {
+      title: 'Clients - ' + client.firstName,
+      reqInfo,
+      clientA: client,
+      clientId: req.params.id
+    });
+  } else {
+    res.render('client-index', {
+      title: 'Clients',
+      reqInfo,
+      clients: []
+    });
+  }
+};
+
+exports.Create = async function (req, res) {
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
+  res.render('client-form', {
+    title: 'Create Client',
+    reqInfo,
+    errorMessage: '',
+    client_id: '',
+    clientA: {}
+  });
+};
+
+exports.CreateClient = async function (req, res) {
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
+  let tempClientObj = new Client({
+    name: req.body.name,
+    code: req.body.code,
+    company: req.body.company,
+    email: req.body.email
+  });
+
+  let response = await _clientOps.createClient(tempClientObj);
+  if (response.errorMsg == '') {
+    let clients = await _clientOps.getAllClients();
+    res.render('client-index', {
+      title: 'Clients',
+      reqInfo,
+      clients: clients,
+      filterText: '',
+      errorMessage: ''
+    });
+  } else {
+    res.render('client-form', {
+      title: 'Create Profile',
+      reqInfo,
+      clientA: response.obj,
+      errorMessage: response.errorMsg,
+      client_id: ''
+    });
+  }
+};
+
 exports.Edit = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const clientId = req.params.id;
   let clientObj = await _clientOps.getClientById(clientId);
   res.render('client-form', {
@@ -37,7 +132,14 @@ exports.Edit = async function (req, res) {
 };
 
 exports.EditClient = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const clientId = req.body.client_id;
   const name = req.body.name;
   const code = req.body.code;
@@ -75,51 +177,15 @@ exports.EditClient = async function (req, res) {
   }
 };
 
-// Handle profile form GET request
-exports.Create = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
-  res.render('client-form', {
-    title: 'Create Client',
-    reqInfo,
-    errorMessage: '',
-    client_id: '',
-    clientA: {}
-  });
-};
-
-// Handle profile form Post request
-exports.CreateClient = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
-  let tempClientObj = new Client({
-    name: req.body.name,
-    code: req.body.code,
-    company: req.body.company,
-    email: req.body.email
-  });
-
-  let response = await _clientOps.createClient(tempClientObj);
-  if (response.errorMsg == '') {
-    let clients = await _clientOps.getAllClients();
-    res.render('client-index', {
-      title: 'Clients',
-      reqInfo,
-      clients: clients,
-      filterText: '',
-      errorMessage: ''
-    });
-  } else {
-    res.render('client-form', {
-      title: 'Create Profile',
-      reqInfo,
-      clientA: response.obj,
-      errorMessage: response.errorMsg,
-      client_id: ''
-    });
-  }
-};
-
 exports.DeleteClientById = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const clientId = req.params.id;
   let deletedClient = await _clientOps.deleteClientById(clientId);
   let clients = await _clientOps.getAllClients();
@@ -138,26 +204,6 @@ exports.DeleteClientById = async function (req, res) {
       reqInfo,
       clients: clients,
       errorMessage: 'Error.  Unable to Delete'
-    });
-  }
-};
-
-exports.Detail = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
-  const clientId = req.params.id;
-  let client = await _clientOps.getClientById(clientId);
-  if (client) {
-    res.render('client-detail', {
-      title: 'Clients - ' + client.firstName,
-      reqInfo,
-      clientA: client,
-      clientId: req.params.id
-    });
-  } else {
-    res.render('client-index', {
-      title: 'Clients',
-      reqInfo,
-      clients: []
     });
   }
 };

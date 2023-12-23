@@ -6,15 +6,17 @@ const UserOps = require('../data/UserOps');
 const _userOps = new UserOps();
 
 exports.Register = async = (req, res) => {
+  let reqInfo = RequestService.checkUserAuth(req);
   res.render('register', {
     title: 'Registration',
     errorMessage: '',
     user: {},
-    reqInfo: {}
+    reqInfo
   });
 };
 
 exports.RegisterUser = async (req, res) => {
+  let reqInfo = RequestService.checkUserAuth(req);
   const password = req.body.password;
   const passwordConfirm = req.body.passwordConfirm;
   if (password == passwordConfirm) {
@@ -34,12 +36,11 @@ exports.RegisterUser = async (req, res) => {
     User.register(newUser, req.body.password, (err, account) => {
       // Show registration form with errors if fail.
       if (err) {
-        let reqInfo = RequestService.checkUserAuth(req, res);
         return res.render('register', {
           title: 'Registration',
           user: newUser,
           errorMessage: err,
-          reqInfo: reqInfo
+          reqInfo
         });
       }
 
@@ -49,7 +50,6 @@ exports.RegisterUser = async (req, res) => {
       });
     });
   } else {
-    let reqInfo = RequestService.checkUserAuth(req, res);
     res.render('register', {
       title: 'Registration',
       user: {
@@ -59,49 +59,26 @@ exports.RegisterUser = async (req, res) => {
         username: req.body.username
       },
       errorMessage: 'Passwords do not match.',
-      reqInfo: reqInfo
+      reqInfo
     });
   }
 };
 
 exports.Login = async (req, res) => {
+  let reqInfo = RequestService.checkUserAuth(req);
   let errorMessage = req.query.errorMessage;
   res.render('login', {
     title: 'Login',
     user: {},
     errorMessage: errorMessage,
-    reqInfo: {}
+    reqInfo
   });
 };
 
-// exports.LoginUser = async (req, res, next) => {
-//   passport.authenticate(
-//     'local',
-//     {
-//       successRedirect: `/users/${req.body.username}`,
-//       failureRedirect: '/users/login?errorMessage=Invalid login.'
-//     },
-//     function () {
-//       req.session.save(() => {
-//         setTimeout(() => {
-//           res.redirect(`/users/${req.body.username}`);
-//         }, 1);
-//       });
-//     }
-//   )(req, res, next);
-// };
-
 exports.LoginUser = async (req, res, next) => {
-  passport.authenticate('local', (err, user) => {
-    if (err) {
-      res.redirect('/users/login?errorMessage=Invalid login.');
-      return;
-    }
-    req.logIn(user, (err) => {
-      req.session.save(() => {
-        res.redirect(`/users/${req.body.username}`);
-      });
-    });
+  passport.authenticate('local', {
+    successRedirect: `/users/${req.body.username}`,
+    failureRedirect: '/users/login?errorMessage=Invalid login.'
   })(req, res, next);
 };
 
@@ -111,22 +88,28 @@ exports.Logout = (req, res) => {
     if (err) {
       return next(err);
     } else {
-      // logged out. Update the reqInfo and redirect to the login page
-      let reqInfo = RequestService.checkUserAuth(req, res);
+      let reqInfo = RequestService.checkUserAuth(req);
+      // logged out. Update the reqInfo and redirect to the home page
       res.render('index', {
         title: 'Home',
         user: {},
         isLoggedIn: false,
         errorMessage: '',
-        reqInfo: reqInfo
+        reqInfo
       });
     }
   });
 };
 
 exports.Index = async (req, res) => {
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
   const filterText = req.query.filterText ?? '';
-  const reqInfo = RequestService.checkUserAuth(req);
   let users;
   if (filterText) {
     users = await _userOps.getFilteredUsers(filterText);
@@ -144,9 +127,11 @@ exports.Index = async (req, res) => {
 };
 
 exports.UserDetail = async (req, res) => {
-  let reqInfo = RequestService.checkUserAuth(req, res);
+  let reqInfo = RequestService.checkUserAuth(req);
   if (!reqInfo.authenticated) {
-    return res;
+    return res.redirect(
+      `/users/login?errorMessage=You must login to access this area`
+    );
   }
 
   let roles = await _userOps.getRolesByUsername(reqInfo.username);
@@ -163,7 +148,14 @@ exports.UserDetail = async (req, res) => {
 };
 
 exports.Create = async (req, res) => {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   res.render('user-form', {
     title: 'Create User',
     reqInfo,
@@ -174,8 +166,15 @@ exports.Create = async (req, res) => {
 };
 
 exports.CreateUser = async (req, res) => {
-  let reqInfo = RequestService.checkUserAuth(req);
-  const password = req.body.password;
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
+  const password = req.body.newPassword;
   const passwordConfirm = req.body.passwordConfirm;
   const userRoles = req.body.roles;
   let roles = ['Registered'];
@@ -185,15 +184,16 @@ exports.CreateUser = async (req, res) => {
     roles.push(userRoles);
   }
 
+  const newUser = new User({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    username: req.body.username,
+    roles
+  });
+
   if (password == passwordConfirm) {
-    const newUser = new User({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      username: req.body.username,
-      roles
-    });
-    User.register(newUser, req.body.password, (err, account) => {
+    User.register(newUser, password, (err, account) => {
       // Show user form with errors if fail.
       if (err) {
         return res.render('user-form', {
@@ -221,6 +221,16 @@ exports.CreateUser = async (req, res) => {
 
 exports.Edit = async (req, res) => {
   let reqInfo = RequestService.checkUserAuth(req);
+  //redirect to login page if user not logged in, not a manager or admin, or editing his/her
+  //own profile
+  if (
+    !reqInfo.authenticated ||
+    (!reqInfo.roles.some((role) => ['Admin', 'Manager'].includes(role)) &&
+      req.params.username !== reqInfo.username)
+  ) {
+    return;
+  }
+
   let userInfo = await _userOps.getUserInfoByUsername(req.params.username);
   return res.render('user-form', {
     title: 'Edit User',
@@ -233,6 +243,16 @@ exports.Edit = async (req, res) => {
 
 exports.EditUser = async (req, res) => {
   let reqInfo = RequestService.checkUserAuth(req);
+  //redirect to login page if user not logged in, not a manager or admin, or editing his/her
+  //own profile
+  if (
+    !reqInfo.authenticated ||
+    (!reqInfo.roles.some((role) => ['Admin', 'Manager'].includes(role)) &&
+      req.params.username !== reqInfo.username)
+  ) {
+    return;
+  }
+
   let userInfo = await _userOps.getUserInfoByUsername(req.params.username);
 
   const userRoles = req.body.roles;
@@ -258,7 +278,7 @@ exports.EditUser = async (req, res) => {
     return res.render('user-form', {
       title: 'Edit User',
       reqInfo,
-      user: userObj,
+      user: userInfo.user,
       username: userInfo.user.username,
       errorMessage: response.errorMsg
     });
@@ -279,7 +299,7 @@ exports.EditUser = async (req, res) => {
       return res.render('user-form', {
         title: 'Edit User',
         reqInfo,
-        user: userObj,
+        user: userInfo.user,
         username: userInfo.user.username,
         errorMessage
       });
@@ -291,7 +311,7 @@ exports.EditUser = async (req, res) => {
       return res.render('user-form', {
         title: 'Edit User',
         reqInfo,
-        user: userObj,
+        user: userInfo.user,
         username: userInfo.user.username,
         errorMessage
       });
@@ -307,7 +327,7 @@ exports.EditUser = async (req, res) => {
         return res.render('user-form', {
           title: 'Edit User',
           reqInfo,
-          user: userObj,
+          user: userInfo.user,
           username: userInfo.user.username,
           errorMessage
         });
@@ -334,7 +354,14 @@ exports.EditUser = async (req, res) => {
 };
 
 exports.DeleteUserByUsername = async (req, res) => {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const username = req.params.username;
   let deletedUser = await _userOps.deleteUserByUsername(username);
   const users = await _userOps.getAllUsers();

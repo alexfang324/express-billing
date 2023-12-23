@@ -10,9 +10,13 @@
   />
   <button class="btn btn-success" type="submit" value="Submit">Filter</button>
 </form>
+<% if (reqInfo && reqInfo.roles &&
+reqInfo.roles.some((role=>['Admin'].includes(role)))){ %>
 <button class="btn btn-primary" onClick="window.location.href='/users/edit'">
   Create User
 </button>
+<% } %>
+
 <ul class="model-item-list">
   <% for (let i=0; i < users.length; i++) { %>
   <li>
@@ -25,12 +29,15 @@
       >
         edit
       </button>
+      <% if (reqInfo && reqInfo.roles &&
+      reqInfo.roles.some((role=>['Admin'].includes(role)))){ %>
       <button
         class="btn btn-danger"
         onClick="window.location.href='/users/<%= users[i].username%>/delete'"
       >
         delete
       </button>
+      <% }%>
     </div>
   </li>
   <% } %>

@@ -2,7 +2,7 @@ class RequestService {
   // Constructor
   RequestService() {}
 
-  checkUserAuth = (req, res, permittedRoles = []) => {
+  checkUserAuth = (req, permittedRoles = []) => {
     // restrict permissions by default
     let rolePermitted = false;
 
@@ -33,12 +33,7 @@ class RequestService {
           rolePermitted
         };
       } else {
-        //if not authorized, redirect to login page with error message
-        res.redirect(
-          `/users/login?errorMessage=You must be a ${permittedRoles.join(
-            '/'
-          )} user to access this area`
-        );
+        //if not authorized
         return {
           authenticated: true,
           username: req.user.username,
@@ -47,10 +42,7 @@ class RequestService {
         };
       }
     } else {
-      //not authenticated, return to login page with error message
-      res.redirect(
-        `/users/login?errorMessage=You must login to access this area`
-      );
+      //not authenticated
       return {
         authenticated: false,
         rolePermitted: false

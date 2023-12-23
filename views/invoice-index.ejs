@@ -11,9 +11,13 @@
   <button class="btn btn-success" type="submit" value="Submit">Filter</button>
 </form>
 
+<% if (reqInfo && reqInfo.roles &&
+reqInfo.roles.some((role=>['Admin','Manager'].includes(role)))){ %>
 <button class="btn btn-primary" onClick="window.location.href='/invoices/edit'">
   Create Invoice
 </button>
+<% } %>
+
 <ul class="model-item-list">
   <% for (let i=0; i < invoices.length; i++) { %>
   <li>
@@ -25,7 +29,8 @@
         [<%=invoices[i].paid?'Paid':'Not Paid'%>]
       </p>
     </div>
-
+    <% if (reqInfo && reqInfo.roles &&
+    reqInfo.roles.some((role=>['Admin','Manager'].includes(role)))){ %>
     <div class="flex-row">
       <form action="/invoices/toggle-paid/<%= invoices[i]._id%>" method="POST">
         <button class="btn btn-primary" name="mark-paid-btn">
@@ -46,6 +51,7 @@
         delete
       </button>
     </div>
+    <% } %>
   </li>
   <% } %>
 </ul>

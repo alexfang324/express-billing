@@ -5,7 +5,14 @@ const RequestService = require('../services/RequestService');
 const _productOps = new ProductOps();
 
 exports.Index = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   const filterText = req.query.filterText ?? '';
   let products;
   if (filterText) {
@@ -24,7 +31,14 @@ exports.Index = async function (req, res) {
 };
 
 exports.Detail = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin', 'Manager'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin or Manager user to access this area`
+    );
+  }
+
   let product = await _productOps.getProductById(req.params.id);
   const productId = req.params.id;
   res.render('product-detail', {
@@ -35,7 +49,14 @@ exports.Detail = async function (req, res) {
 };
 
 exports.Create = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   res.render('product-form', {
     title: 'Create Product',
     reqInfo,
@@ -46,7 +67,13 @@ exports.Create = async function (req, res) {
 };
 
 exports.CreateProduct = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
 
   //create a product schema object using form data
   let formObj = new Product({
@@ -83,7 +110,14 @@ exports.CreateProduct = async function (req, res) {
 };
 
 exports.Edit = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const productId = req.params.id;
   const product = await _productOps.getProductById(productId);
   res.render('product-form', {
@@ -96,7 +130,14 @@ exports.Edit = async function (req, res) {
 };
 
 exports.EditProduct = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const productId = req.body.productId;
   const formObj = {
     name: req.body.name,
@@ -130,7 +171,14 @@ exports.EditProduct = async function (req, res) {
 };
 
 exports.DeleteProductById = async function (req, res) {
-  const reqInfo = RequestService.checkUserAuth(req);
+  const permittedRoles = ['Admin'];
+  let reqInfo = RequestService.checkUserAuth(req, permittedRoles);
+  if (!reqInfo.rolePermitted) {
+    res.redirect(
+      `/users/login?errorMessage=You must be an Admin user to access this area`
+    );
+  }
+
   const productId = req.params.id;
   let deletedProduct = await _productOps.deleteProductById(productId);
   let products = await _productOps.getAllProducts();

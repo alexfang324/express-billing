@@ -1,5 +1,6 @@
 const RequestService = require('../services/RequestService');
 
 exports.Index = async (req, res) => {
-  return res.render('index', { title: 'Home', reqInfo: {} });
+  let reqInfo = RequestService.checkUserAuth(req);
+  return res.render('index', { title: 'Home', reqInfo });
 };

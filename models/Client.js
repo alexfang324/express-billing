@@ -8,6 +8,7 @@ const clientSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
       validate: [emailValidator, 'email provided is not in correct format']
     }
   },

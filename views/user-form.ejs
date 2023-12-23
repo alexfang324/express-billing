@@ -57,11 +57,11 @@
     <label for="roles">User Role:</label>
     <div>
       <input type="checkbox" id="roles" name="roles" value="Manager"
-      <%=user.roles.includes('Manager')&& 'checked' %>>
-      <label for="roles"> Manager</label><br>
+      <%=user.roles && user.roles.includes('Manager') && 'checked' %>>
+      <label> Manager</label><br>
       <input type="checkbox" id="roles" name="roles" value="Admin"
-      <%=user.roles.includes('Admin')&& 'checked' %>>
-      <label for="roles"> Admin</label><br>
+      <%=user.roles && user.roles.includes('Admin') && 'checked' %>>
+      <label> Admin</label><br>
     </div>
     <%}%>
 
