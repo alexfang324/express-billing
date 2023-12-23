@@ -13,7 +13,8 @@ const userSchema = mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    required: true
+    required: true,
+    validate: [emailValidator, 'email provided is not in correct format']
   },
   username: {
     type: String,
@@ -28,6 +29,11 @@ const userSchema = mongoose.Schema({
     required: true
   }
 });
+
+function emailValidator(value) {
+  return /^\S+@\S+\.\S+$/.test(value);
+}
+
 // Add passport-local-mongoose to our Schema
 userSchema.plugin(passportLocalMongoose);
 
